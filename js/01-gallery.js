@@ -1,4 +1,4 @@
-// import { galleryItems } from "./gallery-items.js";
+import { galleryItems } from "./gallery-items.js";
 // // Change code below this line
 
 // // console.log(galleryItems);
@@ -60,21 +60,78 @@
 //   }
 // }
 
-import { galleryItems } from "./gallery-items.js";
-// Change code below this line
+// import { galleryItems } from "./gallery-items.js";
+// const listUlElem = document.querySelector(".gallery");
+// const cardMarkup = createImageCardMarkup(galleryItems);
 
-// console.log(galleryItems);
+// listUlElem.insertAdjacentHTML("beforeend", cardMarkup);
 
-const listUlElem = document.querySelector(".gallery");
-const cardMarkup = createImageCardMarkup(galleryItems);
+// function createImageCardMarkup(galleryItems) {
+//   return galleryItems
+//     .map(({ preview, original, description }) => {
+//       return `
+//       <li class="gallery__item">
+//         <a class="gallery__link" href="${original}">
+//           <img
+//             class="gallery__image"
+//             src="${preview}"
+//             data-source="${original}"
+//             alt="${description}"
+//           />
+//         </a>
+//       </li>
+//     `;
+//     })
+//     .join("");
+// }
 
-listUlElem.insertAdjacentHTML("beforeend", cardMarkup);
+// listUlElem.addEventListener("click", onImgClick);
 
-function createImageCardMarkup(galleryItems) {
-  return galleryItems
+// function onImgClick(event) {
+//   const { target } = event;
+//   event.preventDefault();
+//   if (!target.dataset.source) {
+//     return;
+//   } else {
+//     const instance = basicLightbox.create(
+//       `
+//     <img
+//             class="gallery__image"
+//             src="${target.dataset.source}"
+//             data-source="${target.dataset.source}"
+//             alt="${target.alt}"
+//           />
+
+// `,
+//       {
+//         onShow: (instance) => {
+//           document.addEventListener("keydown", onBtnClick);
+//         },
+//         onClose: (instance) => {
+//           document.removeEventListener("keydown", onBtnClick);
+//         },
+//       }
+//     );
+//     instance.show();
+
+//     function onBtnClick(event) {
+//       if (event.code === "Escape" && instance.visible()) {
+//         instance.close();
+//       }
+//     }
+//   }
+// }
+
+// 05.03.25
+
+const refs = {
+  galleryList: document.querySelector("ul"),
+};
+
+function renderGallery(container, items) {
+  const markup = items
     .map(({ preview, original, description }) => {
-      return `
-      <li class="gallery__item">
+      return `<li class="gallery__item">
         <a class="gallery__link" href="${original}">
           <img
             class="gallery__image"
@@ -83,45 +140,44 @@ function createImageCardMarkup(galleryItems) {
             alt="${description}"
           />
         </a>
-      </li>
-    `;
+      </li>`;
     })
     .join("");
+
+  container.insertAdjacentHTML("beforeend", markup);
 }
 
-listUlElem.addEventListener("click", onImgClick);
+renderGallery(refs.galleryList, galleryItems);
+
+refs.galleryList.addEventListener("click", onImgClick);
+
+let instance = null;
+
+function createInstance(imageUrl) {
+  return basicLightbox.create(
+    `<img src="${imageUrl}" width="800" height="600">`,
+    {
+      onShow: () => document.addEventListener("keydown", onEscClick),
+      onClose: () => document.removeEventListener("keydown", onEscClick),
+    }
+  );
+}
 
 function onImgClick(event) {
-  const { target } = event;
   event.preventDefault();
-  if (!target.dataset.source) {
+  const LargeImgUrl = event.target.dataset.source;
+  if (!LargeImgUrl) {
     return;
-  } else {
-    const instance = basicLightbox.create(
-      `
-    <img
-            class="gallery__image"
-            src="${target.dataset.source}"
-            data-source="${target.dataset.source}"
-            alt="${target.alt}"            
-          />
-    
-`,
-      {
-        onShow: (instance) => {
-          document.addEventListener("keydown", onBtnClick);
-        },
-        onClose: (instance) => {
-          document.removeEventListener("keydown", onBtnClick);
-        },
-      }
-    );
-    instance.show();
+  }
+  instance = createInstance(LargeImgUrl);
 
-    function onBtnClick(event) {
-      if (event.code === "Escape" && instance.visible()) {
-        instance.close();
-      }
-    }
+  instance.show();
+}
+
+function onEscClick(event) {
+  console.log(instance);
+
+  if (event.key === "Escape" && instance.visible()) {
+    instance.close();
   }
 }
